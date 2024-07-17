@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basketball Career Mode</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e9ecef;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #343a40;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            text-align: center;
+            width: 300px;
+        }
+        .menu, .player-creation, .team-selection, .match-simulation, .career-progression {
+            display: none;
+        }
+        .menu.active, .player-creation.active, .team-selection.active, .match-simulation.active, .career-progression.active {
+            display: block;
+        }
+        .button {
+            display: block;
+            margin: 10px auto;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        input, select {
+            width: 80%;
+            padding: 8px;
+            margin: 10px auto;
+            display: block;
+            border-radius: 5px;
+            border: 1px solid #ced4da;
+        }
+        h1, p {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="menu active">
+            <h1>Basketball Career Mode</h1>
+            <button class="button" onclick="showPlayerCreation()">Start as Player</button>
+            <button class="button" onclick="showTeamSelection()">Start as Coach</button>
+        </div>
+
+        <div class="player-creation">
+            <h1>Create Your Player</h1>
+            <input type="text" id="player-name" placeholder="Enter Player Name"><br>
+            <select id="college-select"></select><br>
+            <button class="button" onclick="startPlayerCareer()">Start Career</button>
+        </div>
+
+        <div class="team-selection">
+            <h1>Select Your Team</h1>
+            <select id="team-select"></select><br>
+            <button class="button" onclick="startCoachCareer()">Start Coaching</button>
+        </div>
+
+        <div class="match-simulation">
+            <h1>Match Simulation</h1>
+            <p id="match-result"></p>
+            <button class="button" onclick="simulateMatch()">Simulate Match</button>
+            <button class="button" onclick="switchRole()">Switch Role</button>
+            <button class="button" onclick="endMatch()">End Match</button>
+        </div>
+
+        <div class="career-progression">
+            <h1>Career Progression</h1>
+            <p id="career-stats"></p>
+            <button class="button" onclick="nextMatch()">Next Match</button>
+            <button class="button" onclick="returnToMenu()">Return to Menu</button>
+        </div>
+    </div>
+
+    <script>
+        const collegeTeams = [
+            "Duke", "North Carolina", "Kentucky", "UCLA", "Kansas", 
+            "Michigan State", "Gonzaga", "Villanova", "Syracuse", "Louisville",
+            "Arizona", "Michigan", "Indiana", "Texas", "Florida",
+            "Baylor", "Oregon", "Maryland", "Ohio State", "Arkansas",
+            "Tennessee", "Auburn", "LSU", "Wisconsin", "Purdue",
+            "Alabama", "Iowa", "Texas Tech", "USC", "West Virginia",
+            "Virginia", "Virginia Tech", "Oklahoma", "Providence", "Seton Hall",
+            "Creighton", "Clemson", "Marquette", "Xavier", "TCU"
+        ];
+        const nbaTeams = [
+            "Atlanta Hawks", "Boston Celtics", "Brooklyn Nets", "Charlotte Hornets", 
+            "Chicago Bulls", "Cleveland Cavaliers", "Dallas Mavericks", "Denver Nuggets", 
+            "Detroit Pistons", "Golden State Warriors", "Houston Rockets", "Indiana Pacers", 
+            "LA Clippers", "Los Angeles Lakers", "Memphis Grizzlies", "Miami Heat", 
+            "Milwaukee Bucks", "Minnesota Timberwolves", "New Orleans Pelicans", "New York Knicks", 
+            "Oklahoma City Thunder", "Orlando Magic", "Philadelphia 76ers", "Phoenix Suns", 
+            "Portland Trail Blazers", "Sacramento Kings", "San Antonio Spurs", "Toronto Raptors", 
+            "Utah Jazz", "Washington Wizards"
+        ];
+        let currentPlayerName = "";
+        let currentCollegeTeam = "";
+        let currentTeamName = "";
+        let isPlayerMode = true;
+
+        let playerStats = {
+            points: 0,
+            assists: 0,
+            rebounds: 0,
+            matches: 0
+        };
+
+        function showPlayerCreation() {
+            document.querySelector('.menu').classList.remove('active');
+            document.querySelector('.player-creation').classList.add('active');
+            populateSelect('college-select', collegeTeams);
+        }
+
+        function showTeamSelection() {
+            document.querySelector('.menu').classList.remove('active');
+            document.querySelector('.team-selection').classList.add('active');
+            populateSelect('team-select', nbaTeams);
+        }
+
+        function populateSelect(selectId, optionsArray) {
+            const selectElement = document.getElementById(selectId);
+            selectElement.innerHTML = "";
+            optionsArray.forEach(team => {
+                const option = document.createElement("option");
+                option.value = team;
+                option.textContent = team;
+                selectElement.appendChild(option);
+            });
+        }
+
+        function startPlayerCareer() {
+            currentPlayerName = document.getElementById('player-name').value;
+            currentCollegeTeam = document.getElementById('college-select').value;
+            if (currentPlayerName && currentCollegeTeam) {
+                isPlayerMode = true;
+                alert(`Starting career for player: ${currentPlayerName} at ${currentCollegeTeam}`);
+                showMatchSimulation();
+            } else {
+                alert("Please enter a player name and select a college team.");
+            }
+        }
+
+        function startCoachCareer() {
+            currentTeamName = document.getElementById('team-select').value;
+            if (currentTeamName) {
+                isPlayerMode = false;
+                alert(`Starting coaching career for team: ${currentTeamName}`);
+                showMatchSimulation();
+            } else {
+                alert("Please select a team.");
+            }
+        }
+
+        function showMatchSimulation() {
+            document.querySelector('.player-creation').classList.remove('active');
+            document.querySelector('.team-selection').classList.remove('active');
+            document.querySelector('.match-simulation').classList.add('active');
+        }
+
+        function simulateMatch() {
+            let teamAScore = Math.floor(Math.random() * 100);
+            let teamBScore = Math.floor(Math.random() * 100);
+            let result = `Team A: ${teamAScore} - Team B: ${teamBScore}\n`;
+
+            if (isPlayerMode) {
+                result += `Player ${currentPlayerName} ${teamAScore > teamBScore ? 'wins!' : 'loses.'}`;
+                playerStats.points += Math.floor(Math.random() * 30);
+                playerStats.assists += Math.floor(Math.random() * 10);
+                playerStats.rebounds += Math.floor(Math.random() * 10);
+                playerStats.matches += 1;
+            } else {
+                result += `Coach of ${currentTeamName} ${teamAScore > teamBScore ? 'wins!' : 'loses.'}`;
+            }
+
+            document.getElementById('match-result').innerText = result;
+        }
+
+        function switchRole() {
+            isPlayerMode = !isPlayerMode;
+            let role = isPlayerMode ? 'player' : 'coach';
+            alert(`Switching to ${role} mode.`);
+        }
+
+        function endMatch() {
+            document.getElementById('match-result').innerText = "";
+            showCareerProgression();
+        }
+
+        function showCareerProgression() {
+            document.querySelector('.match-simulation').classList.remove('active');
+            document.querySelector('.career-progression').classList.add('active');
+            updateCareerStats();
+        }
+
+        function updateCareerStats() {
+            if (isPlayerMode) {
+                document.getElementById('career-stats').innerText = `
+                    Player: ${currentPlayerName}\n
+                    Points: ${playerStats.points}\n
+                    Assists: ${playerStats.assists}\n
+                    Rebounds: ${playerStats.rebounds}\n
+                    Matches: ${playerStats.matches}
+                `;
+            } else {
+                document.getElementById('career-stats').innerText = `
+                    Coach: ${currentTeamName}
+                `;
+            }
+        }
+
+        function nextMatch() {
+            document.querySelector('.career-progression').classList.remove('active');
+            document.querySelector('.match-simulation').classList.add('active');
+        }
+
+        function returnToMenu() {
+            document.querySelector('.career-progression').classList.remove('active');
+            document.querySelector('.menu').classList.add('active');
+        }
+    </script>
+</body>
+</html>
